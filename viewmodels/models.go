@@ -10,3 +10,8 @@ type Client struct {
 	Nickname string `json:"nickname"`
 	Master   bool   `json:"master"`
 }
+
+type Message struct {
+	Id   string `json:"id"`
+	Data string `json:"data"`
+}

@@ -60,6 +60,17 @@ function updateRoomInfo(code) {
 	});
 }
 
+function pollForMessages(code, id, token) {
+	$.ajax("http://localhost:9090/info", {
+    data : JSON.stringify({ code: code, id: id, token: token}),
+    contentType : 'application/json',
+    type : 'POST',
+    success: function(o) {
+    	console.log(o);
+    }
+	});
+}
+
 function startLoop() {
 	if(looping) {
 		return;
@@ -74,20 +85,21 @@ function inRoom() {
 	var id = localStorage.getItem('id');
 	var token = localStorage.getItem('token');
 
-	return (id != undefined && token != undefined && code != undefined)
+	return (id != undefined && token != undefined && code != undefined);
 }
 
 function updateLoop() {
 	if(!looping) {
-		$('#joinform').css({"display":"default"});
+		$('#joinform').css({"display":"inline"});
 		return;
 	}
 
 	looping = inRoom();
 	updateRoomInfo(localStorage.getItem('code'));
+	//pollForMessages(localStorage.getItem('code'), localStorage.getItem('id'), localStorage.getItem('token'));
 
 	$('#joinform').css({"display":"none"});
 	
 	console.log("loop");
-    setTimeout(updateLoop, 5000);
+    setTimeout(updateLoop, 1000);
 }

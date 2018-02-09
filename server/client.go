@@ -5,13 +5,20 @@ type Client struct {
 	token    string
 	nickname string
 	master   bool
-	data     []string
+	data     []Message
 }
 
-func (c *Client) AddData(data string) {
+func (c *Client) AddData(data Message) {
 	c.data = append(c.data, data)
 }
 
+func (c *Client) RetreiveData() []Message {
+	msgs := make([]Message, len(c.data))
+	copy(msgs, c.data)
+	c.data = nil
+	return msgs
+}
+
 func NewClient(id, token, nickname string, master bool) *Client {
-	return &Client{id, token, nickname, master, make([]string, 0)}
+	return &Client{id, token, nickname, master, make([]Message, 0)}
 }

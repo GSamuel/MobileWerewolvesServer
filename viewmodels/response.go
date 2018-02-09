@@ -13,8 +13,5 @@ type JoinRoomResponse struct {
 }
 
 type RetreiveDataResponse struct {
-	Data string `json:"data"`
-}
-
-type InfoResponse struct {
+	Messages []Message `json:"messages"`
 }

@@ -7,13 +7,16 @@ type JoinRoomRequest struct {
 
 type SendDataRequest struct {
 	Code   string `json:"code"`
-	Target int    `json:"target"`
-	Method int    `json:"method"` //All clients, Server, Specific client
+	Id     string `json:"id"`
+	Token  string `json:"token"`
+	Target string `json:"target"`
 	Data   string `json:"data"`
 }
 
 type RetreiveDataRequest struct {
-	Code string `json:"code"`
+	Code  string `json:"code"`
+	Id    string `json:"id"`
+	Token string `json:"token"`
 }
 
 type InfoRequest struct {

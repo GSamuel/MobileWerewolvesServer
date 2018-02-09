@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/GSamuel/MobileWerewolvesServer/server"
 	"github.com/GSamuel/MobileWerewolvesServer/utils"
 	"github.com/GSamuel/MobileWerewolvesServer/viewmodels"
@@ -12,40 +13,42 @@ import (
 
 var gameServer server.GameServer
 
-func httpHandler(w http.ResponseWriter, r *http.Request) {
-}
-
 func sendData(w http.ResponseWriter, r *http.Request) {
 	var t viewmodels.SendDataRequest
 	utils.Read(r, &t)
 
-	gameServer.SendData(t.Code, t.Target, t.Method, t.Data)
+	err := gameServer.SendData(t.Code, t.Id, t.Token, t.Target, t.Data)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func retreiveData(w http.ResponseWriter, r *http.Request) {
 	var t viewmodels.RetreiveDataRequest
 	utils.Read(r, &t)
-	data, err := gameServer.RetreiveData(t.Code)
+	data, err := gameServer.RetreiveData(t.Code, t.Id, t.Token)
 
 	if err != nil {
-		//do something here
+		fmt.Println(err)
+		return
 	}
 
-	response := viewmodels.RetreiveDataResponse{data}
+	msgs := make([]viewmodels.Message, 0)
+
+	for i := 0; i < len(data); i++ {
+		msgs = append(msgs, viewmodels.Message{data[i].Id, data[i].Data})
+	}
+
+	response := viewmodels.RetreiveDataResponse{msgs}
 	utils.Write(w, response)
 }
 
 func createRoom(w http.ResponseWriter, r *http.Request) {
-	//check if room already exists for this connection.
 	code, id, token := gameServer.CreateRoom()
 
 	response := viewmodels.RoomCreatedResponse{code, id, token}
 
 	utils.Write(w, response)
-
-	//create a new room with unique id.
-	//send id back to room requester.
-	//send unique connection secret to requester. (authorization token)
 }
 
 func joinRoom(w http.ResponseWriter, r *http.Request) {

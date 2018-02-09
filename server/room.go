@@ -9,7 +9,6 @@ import (
 type Room struct {
 	code    string
 	clients []*Client
-	data    []string
 	mux     sync.Mutex
 }
 
@@ -36,33 +35,54 @@ func (r *Room) ClientCount() int {
 	return len(r.clients)
 }
 
-func (r *Room) SendData(code string, target int, method int, data string) {
+func (r *Room) SendData(id, token, target, data string) error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	if method == 0 {
-		for i := 0; i < len(r.clients); i++ {
-			r.clients[i].AddData(data)
-		}
+	sender, err := r.findClient(id)
+
+	if err != nil {
+		return err
 	}
-	if method == 1 {
-		//send to target
-		r.clients[target].AddData(data)
+
+	if sender.token != token {
+		return fmt.Errorf("Invalid token for client with id %s", id)
 	}
-	if method == 2 {
-		r.data = append(r.data, data)
+
+	receiver, err := r.findClient(target)
+
+	if err != nil {
+		return err
 	}
+
+	receiver.AddData(Message{id, data})
+	return nil
 }
 
-func (r *Room) RetreiveData(code string) string {
+func (r *Room) RetreiveData(id, token string) ([]Message, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
-	if len(r.data) == 0 {
-		return ""
+	requester, err := r.findClient(id)
+
+	if err != nil {
+		return []Message{}, err
 	}
 
-	return r.data[len(r.data)-1]
+	if requester.token != token {
+		return []Message{}, fmt.Errorf("Invalid token for client with id %s", id)
+	}
+
+	return requester.RetreiveData(), nil
+}
+
+func (r *Room) findClient(id string) (*Client, error) {
+	for i := 0; i < len(r.clients); i++ {
+		if r.clients[i].id == id {
+			return r.clients[i], nil
+		}
+	}
+	return nil, fmt.Errorf("Client with id %s does not exist", id)
 }
 
 func (r *Room) Info() viewmodels.Room {
@@ -80,5 +100,5 @@ func (r *Room) Info() viewmodels.Room {
 }
 
 func NewRoom(code string) *Room {
-	return &Room{code, make([]*Client, 0), make([]string, 0), sync.Mutex{}}
+	return &Room{code, make([]*Client, 0), sync.Mutex{}}
 }

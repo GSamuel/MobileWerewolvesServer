@@ -48,25 +48,24 @@ func (g *GameServer) findRoom(code string) (*Room, error) {
 	return nil, fmt.Errorf("Room with code %s does not exist", code)
 }
 
-func (g *GameServer) SendData(code string, target int, method int, data string) error {
+func (g *GameServer) SendData(code, id, token, target, data string) error {
 	r, err := g.findRoom(code)
 
 	if err != nil {
 		return err
 	}
 
-	r.SendData(code, target, method, data)
-	return nil
+	return r.SendData(id, token, target, data)
 }
 
-func (g *GameServer) RetreiveData(code string) (string, error) {
+func (g *GameServer) RetreiveData(code, id, token string) ([]Message, error) {
 	r, err := g.findRoom(code)
 
 	if err != nil {
-		return "", err
+		return []Message{}, err
 	}
 
-	return r.RetreiveData(code), nil
+	return r.RetreiveData(id, token)
 }
 
 func NewGameServer() *GameServer {
